@@ -264,11 +264,11 @@ function EventCalendar() {
           showCloseButton={false}
           className="rounded-3xl w-full max-w-lg p-0 overflow-hidden"
           style={{
-            background: "rgba(5,15,8,0.96)",
-            backdropFilter: "blur(40px)",
-            WebkitBackdropFilter: "blur(40px)",
-            border: "1px solid rgba(74,222,128,0.2)",
-            boxShadow: "0 24px 60px rgba(0,0,0,0.7)",
+            background: "rgba(255,255,255,0.07)",
+            backdropFilter: "blur(32px)",
+            WebkitBackdropFilter: "blur(32px)",
+            border: "1px solid rgba(163,230,53,0.2)",
+            boxShadow: "0 24px 80px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
             maxHeight: "85vh",
             display: "flex",
             flexDirection: "column",
@@ -310,8 +310,8 @@ function EventCalendar() {
                     key={idx}
                     className="rounded-2xl p-4 transition-all duration-300 hover:bg-white/5 cursor-pointer group"
                     style={{
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(74,222,128,0.15)",
+                      background: "rgba(0,0,0,0.25)",
                     }}
                     onClick={() => {
                       alert(`Описание:\n\n${ev.description ? ev.description : "Описание не найдено :("}`);
