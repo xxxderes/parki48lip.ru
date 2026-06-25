@@ -11,9 +11,10 @@
   <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 
-  <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }
+  <style>
+    html, body { height: 100%; margin: 0; } #root { height: 100%; }
 
-    /* Minimal preloader */
+    /* Glassmorphism loader */
     #preloader {
       position: fixed;
       inset: 0;
@@ -28,38 +29,162 @@
       opacity: 0;
       pointer-events: none;
     }
-    #preloader .loader-wrap {
+
+    .loader-card {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 16px;
+      gap: 24px;
+      padding: 48px 56px;
+      border-radius: 28px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+      position: relative;
+      overflow: hidden;
     }
-    #preloader .ring {
-      width: 40px;
-      height: 40px;
+
+    .loader-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(163,230,53,0.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .loader-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(74,222,128,0.15) 0%, rgba(45,212,191,0.08) 100%);
+      border: 1px solid rgba(163,230,53,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .loader-logo::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 20px;
+      border: 1px solid rgba(163,230,53,0.1);
+      animation: pulse-ring 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-ring {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    .loader-title {
+      font-family: 'Unbounded', 'Segoe UI', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .progress-container {
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .progress-bar-wrapper {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #4ade80 0%, #a3e635 50%, #2dd4bf 100%);
+      background-size: 200% 100%;
+      transition: width 0.3s ease;
+      position: relative;
+      animation: shimmer 2s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
-      border: 2.5px solid rgba(255,255,255,0.08);
-      border-top-color: #a3e635;
-      animation: spin 0.7s linear infinite;
+      background: #a3e635;
+      box-shadow: 0 0 12px rgba(163,230,53,0.8), 0 0 24px rgba(163,230,53,0.4);
     }
-    #preloader .percent {
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .progress-percent {
       font-family: 'Inter', 'Segoe UI', sans-serif;
       font-size: 13px;
       font-weight: 600;
-      color: rgba(255,255,255,0.5);
-      letter-spacing: 0.04em;
+      color: #a3e635;
+      font-variant-numeric: tabular-nums;
     }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+
+    .progress-status {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .loader-hint {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      margin-top: 8px;
     }
   </style>
 </head>
 <body>
   <!-- Preloader -->
   <div id="preloader">
-    <div class="loader-wrap">
-      <div class="ring"></div>
-      <span class="percent" id="loadPct">0%</span>
+    <div class="loader-card">
+      <div class="loader-logo">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(163,230,53,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="loader-title">Культурные пространства Липецка</div>
+      <div class="progress-container">
+        <div class="progress-bar-wrapper">
+          <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+        <div class="progress-text">
+          <span class="progress-percent" id="progressPercent">0%</span>
+          <span class="progress-status" id="progressStatus">Загрузка...</span>
+        </div>
+      </div>
+      <div class="loader-hint">Подождите, идёт подготовка данных</div>
     </div>
   </div>
 
