@@ -261,6 +261,7 @@ function EventCalendar() {
       {/* Event Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent
+          showCloseButton={false}
           className="rounded-3xl w-full max-w-lg p-0 overflow-hidden"
           style={{
             background: "rgba(5,15,8,0.96)",
@@ -273,14 +274,20 @@ function EventCalendar() {
             flexDirection: "column",
           }}
         >
-          {/* Close button - visible and easy to tap on mobile */}
+          {/* Glass close button */}
           <button
             onClick={() => setDialogOpen(false)}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all hover:bg-white/10"
-            style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}
+            className="absolute top-4 right-4 w-11 h-11 rounded-full flex items-center justify-center z-10 transition-all hover:scale-110 active:scale-95 hover:bg-white/15"
+            style={{
+              background: "rgba(255,255,255,0.08)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+            }}
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round">
-              <path d="M1 1l12 12M13 1L1 13"/>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round">
+              <path d="M1 1l10 10M11 1L1 11"/>
             </svg>
           </button>
 
