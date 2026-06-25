@@ -268,13 +268,27 @@ function EventCalendar() {
             WebkitBackdropFilter: "blur(40px)",
             border: "1px solid rgba(74,222,128,0.2)",
             boxShadow: "0 24px 60px rgba(0,0,0,0.7)",
+            maxHeight: "85vh",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
+          {/* Close button - visible and easy to tap on mobile */}
+          <button
+            onClick={() => setDialogOpen(false)}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all hover:bg-white/10"
+            style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round">
+              <path d="M1 1l12 12M13 1L1 13"/>
+            </svg>
+          </button>
+
           {selectedDay !== null && EVENTS[selectedDay] && (
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto" style={{ flex: 1, maxHeight: "calc(85vh - 80px)" }}>
               <DialogHeader className="mb-5">
                 <DialogTitle
-                  className="text-xl font-black mb-1"
+                  className="text-xl font-black mb-1 pr-8"
                   style={{ color: "#a3e635", fontFamily: "'Unbounded', sans-serif" }}
                 >
                   События {selectedDay} {MONTH_NAMES[month].toLowerCase()}
@@ -283,7 +297,7 @@ function EventCalendar() {
                   Мероприятия в парках Липецка
                 </DialogDescription>
               </DialogHeader>
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3">
                 {EVENTS[selectedDay].map((ev, idx) => (
                   <div
                     key={idx}
@@ -293,15 +307,13 @@ function EventCalendar() {
                       background: "rgba(255,255,255,0.03)",
                     }}
                     onClick={() => {
-                      // Scroll to or navigate to event detail
-                      // For now, we just show more info
                       alert(`Описание:\n\n${ev.description ? ev.description : "Описание не найдено :("}`);
                     }}
                   >
                     <h4 className="text-sm font-bold mb-2 leading-snug" style={{ color: "#e8f5e9", fontFamily: "'Unbounded', sans-serif" }}>
                       {ev.title}
                     </h4>
-                    <div className="flex items-center gap-4 mb-3">
+                    <div className="flex flex-wrap items-center gap-4 mb-3">
                       <span className="flex items-center gap-1.5 text-xs" style={{ color: "#4ade80" }}>
                         <Clock size={10} /> {ev.time}
                       </span>
