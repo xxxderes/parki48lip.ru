@@ -65,16 +65,5 @@
 
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
-
-  <script>
-    (function() {
-      var p = 0, el = document.getElementById('loadPct');
-      var iv = setInterval(function() {
-        p += Math.floor(Math.random() * 10) + 5;
-        if (p >= 100) { p = 100; clearInterval(iv); }
-        el.textContent = p + '%';
-      }, 120);
-    })();
-  </script>
 </body>
 </html>
