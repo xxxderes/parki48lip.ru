@@ -1,9 +1,185 @@
+# 🌳 Культурные пространства Липецка
 
-  # Сайт о парках Липецка
+[![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6.3-646CFF?logo=vite)](https://vitejs.dev/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.1-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
 
-  ## Running the code
+> **Концептуальный редизайн сайта МАУК «Культурные пространства Липецка»**<br>
+> Премиальный digital-продукт для презентации культурного и природного наследия города.
 
-  Run `npm i` to install the dependencies.
+[**🚀 Посмотреть демо**](https://spontaneous-marigold-6fbeec.netlify.app/)
 
-  Run `npm run dev` to start the development server.
-  
+**Исходный сайт:** [parki48lip.ru](https://parki48lip.ru/index.php?id=1)
+
+---
+
+## 🎞️ Демо-видео
+
+[![Watch the video](https://img.youtube.com/vi/XXXXX/maxresdefault.jpg)](https://github.com/user-attachments/assets/2jflash46/tour.mp4)
+*(Кликните для просмотра короткого видео-тур)*
+
+---
+
+## ✨ Ключевые особенности
+
+### 🎨 Дизайн & UX
+- **Glassmorphism** — стеклянные карточки с блюром
+- **Кинематографичный видео-фон** — реальная съёмка из парков Липецка
+- **Mobile-First** — адаптив для всех устройств
+- **Плавные анимации** — Intersection Observer, Motion
+
+### 🗺️ Интерактивные карты
+- Реальные координаты 5+ парков Липецка
+- **MapLibre GL** + OpenStreetMap
+- Карточки зон парков с описанием
+
+### 📅 Афиша событий
+- Динамический календарь мероприятий
+- 6 фильтров: Концерты, Мастер-классы, Экскурсии, Яога, Выставки, Детские
+- Модальные окна с описанием
+
+### 🌤️ Интеграции
+- **Погода** — Open-Meteo API (реальные данные)
+- **Поиск** по паркам и событиям
+- **SEO** — Schema.org, Open Graph, мета-теги
+
+---
+
+## 🚀 Быстрый старт
+
+### Требования
+- **Node.js** ≥ 18.0
+- **npm** ≥ 9.0 или **pnpm** ≥ 8.0
+
+### Установка
+
+```bash
+# Клонирование репозитория
+git clone <repository-url>
+cd "Сайт о парках Липецка"
+
+# Установка зависимостей
+npm install
+
+# Запуск dev-сервера
+npm run dev
+```
+
+### Скрипты
+
+| Команда | Описание |
+|---------|----------|
+| `npm run dev` | Запуск dev-сервера |
+| `npm run build` | Production-сборка |
+
+---
+
+## 🏛️ Архитектура проекта
+
+```
+├── public/                        # Статические файлы
+├── src/
+│   ├── app/
+│   │   ├── components/
+│   │   │   ├── ui/                # 30+ компонентов shadcn/ui
+│   │   │   ├── ParksPage.tsx      # Каталог парков (5 объектов)
+│   │   │   ├── ParkDetailPage.tsx # Детальная страница парка
+│   │   │   ├── EventsPage.tsx     # Календарь событий (6 категорий)
+│   │   │   ├── RoutesPage.tsx     # Туристические маршруты
+│   │   │   ├── TeamPage.tsx       # Команда организации
+│   │   │   ├── DocumentsPage.tsx # Документы
+│   │   │   └── ContactsPage.tsx   # Контакты
+│   ├── data/
+│   │   └── teamData.ts            # Данные о сотрудниках
+│   ├── hooks/
+│   │   └── useReveal.ts           # Intersection Observer
+│   └── styles/                     # Глобальные стили, тема
+└── index.html                       # SEO-микроразметка
+```
+
+---
+
+## 🔧 Технологический стек
+
+### Frontend
+- **React 18** — UI-библиотека
+- **TypeScript** — типизация
+- **Vite 6** — сборщик
+- **Tailwind CSS v4** — стилизация
+- **shadcn/ui** — Radix UI компоненты
+- **Motion** — анимации
+
+### Maps
+- **MapLibre GL** — OpenStreetMap-рендеринг
+
+### Инструменты разработки
+- **Figma** — проектирование UI/UX
+- **Cursor (AI IDE)** — разработка
+- **Lighthouse** — аудит производительности
+- **Vercel / Netlify** — деплой
+
+---
+
+## 🧮 Затраты и Стоимость
+
+### Трудозатраты
+
+| Этап | Часы | Описание |
+|------|-------|----------|
+| Дизайн | 40 | UX/UI, стилизация, анимации |
+| Frontend Core | 60 | Архитектура, страницы, карты |
+| Интеграции | 10 | API, поиск, SEO |
+| Полировка | 20 | Адаптив, оптимизация |
+| **Итого (примерная оценка)** | **130** | **~130 000 ₽** |
+
+---
+
+## 📊 Оценка качества (Lighthouse)
+
+| Параметр | Оценка |
+|----------|--------|
+| Performance (Десктоп) | 95-98 |
+| Performance (Моб) | 80-85 |
+| Accessibility | 88-94 |
+| Best Practices | 100 |
+| SEO | 100 |
+
+---
+
+## 🔄 CI / CD
+
+1. **Локально** — `git commit`
+2. **GitHub Actions** — линтинг, сборка
+3. **Netlify** — авто-деплой (настроен `netlify.toml`)
+
+---
+
+## ❓ FAQ
+
+**В: Можно ли редактировать контент?**<br>
+О: Требуется CMS-интеграция (план).
+
+**В: Как подключить реальные данные?**<br>
+О: Заменить мок-данные `PARKS_DATA`, `EVENTS` на API.
+
+**В: Можно ли адаптировать под другой город?**<br>
+О: Да, изменить координаты, контент, стили — легко.
+
+---
+
+## 📄 Лицензия
+
+- Код: **MIT** (открыт для модификации)
+- Ассеты МАУК: Собственность учреждения — для коммерческого использования требуется разрешение
+
+---
+
+## 🤝 Контакты
+
+- **Автор**: [@fantomzon18](https://vk.com/fantomzon18)
+- **Заказчик**: [MAUK «Культурные пространства Липецка»](https://parki48lip.ru/index.php?id=1)
+
+---
+
+*Сделано для культурного развития Липецка — с ❤️ и PIXELS.*

@@ -3,6 +3,7 @@ import { Search, Calendar, MapPin, Clock, ArrowRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent } from "@/app/components/ui/dialog";
 import demo1 from "@/imports/demo1.jpg";
+import { usePageReveal } from "@/app/hooks/useReveal";
 
 interface EventItem {
   id: string;
@@ -187,7 +188,15 @@ export default function EventsPage() {
   const [dateFilter, setDateFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [selected, setSelected] = useState<EventItem | null>(null);
+
+  const hasFilters = dateFilter !== "all" || activeCategory !== "Все" || searchQuery.trim().length > 0;
+  const resetFilters = () => {
+    setDateFilter("all");
+    setActiveCategory("Все");
+    setSearchQuery("");
+  };
 
   const filteredEvents = useMemo(() => {
     let result = [...EVENTS];
@@ -231,8 +240,19 @@ export default function EventsPage() {
 
   const featured = useMemo(() => EVENTS.filter((e) => e.featured), []);
 
+  const { ref, isVisible } = usePageReveal();
+
   return (
     <div className="relative z-10 min-h-screen pt-[200px]" style={{ fontFamily: "'Inter', sans-serif", background: "rgba(5,15,8,0.35)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}>
+      <div
+        ref={ref}
+        className="relative z-10"
+        style={{
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? "translateY(0)" : "translateY(20px)",
+          transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
+        }}
+      >
       {/* HERO */}
       <section className="relative z-10 px-6 md:px-10 pb-12">
         <div className="max-w-7xl mx-auto text-center">
@@ -241,11 +261,11 @@ export default function EventsPage() {
               Культурная жизнь
             </p>
             <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 uppercase"
+               className="text-3xl md:text-5xl lg:text-6xl font-black mb-6 uppercase break-words"
               style={{
                 color: "#ffffff",
                 fontFamily: "'Unbounded', sans-serif",
-                letterSpacing: "-0.02em",
+                letterSpacing: "-0.02AHnore",
                 lineHeight: 1.1,
               }}
             >
@@ -259,47 +279,79 @@ export default function EventsPage() {
             </p>
           </div>
 
-          {/* Search + Date Filters Row */}
-          <div className="flex items-center justify-center gap-3 mb-6">
-            {/* Date Filters (tabs) */}
-            {DATE_FILTERS.map((f) => (
+          {/* ===== DESKTOP ===== */}
+          <div className="hidden md:block">
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+              {DATE_FILTERS.map((f) => (
+                <button
+                  key={f.value}
+                  onClick={() => setDateFilter((prev) => (prev === f.value ? "all" : f.value))}
+                  className="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200"
+                  style={{
+                    background: dateFilter === f.value ? "#a3e635" : "rgba(255,255,255,0.05)",
+                    color: dateFilter === f.value ? "#071a0e" : "rgba(255,255,255,0.5)",
+                    border: dateFilter === f.value ? "1px solid rgba(163,230,53,0.3)" : "1px solid rgba(255,255,255,0.1)",
+                  }}
+                >
+                  {f.label}
+                </button>
+              ))}
               <button
-                key={f.value}
-                onClick={() => setDateFilter(f.value)}
-                className="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200"
+                onClick={() => setSearchOpen(!searchOpen)}
+                className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-white/10 ml-2"
                 style={{
-                  background: dateFilter === f.value ? "#a3e635" : "rgba(255,255,255,0.05)",
-                  color: dateFilter === f.value ? "#071a0e" : "rgba(255,255,255,0.5)",
-                  border: dateFilter === f.value ? "1px solid rgba(163,230,53,0.3)" : "1px solid rgba(255,255,255,0.1)",
+                  background: searchOpen ? "rgba(163,230,53,0.15)" : "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.1)",
                 }}
               >
-                {f.label}
+                <Search size={16} style={{ color: searchOpen ? "#a3e635" : "rgba(255,255,255,0.5)" }} />
               </button>
-            ))}
-
-            {/* Search Icon */}
-            <button
-              onClick={() => setSearchOpen(!searchOpen)}
-              className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-white/10 ml-2"
+            </div>
+            <div
+              className="transition-all duration-300 ease-in-out overflow-hidden"
               style={{
-                background: searchOpen ? "rgba(163,230,53,0.15)" : "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                maxHeight: searchOpen ? "60px" : "0px",
+                opacity: searchOpen ? 1 : 0,
+                marginBottom: searchOpen ? "16px" : "0px",
               }}
             >
-              <Search size={16} style={{ color: searchOpen ? "#a3e635" : "rgba(255,255,255,0.5)" }} />
-            </button>
+              <div className="relative max-w-md mx-auto">
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: "rgba(255,255,255,0.4)" }} />
+                <input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Найти событие..."
+                  className="w-full rounded-2xl px-5 py-3 text-sm outline-none"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    color: "#ffffff",
+                    paddingLeft: "48px",
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2 pb-2 scrollbar-hide mx-auto" style={{ maxWidth: "100%" }}>
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory((prev) => (prev === cat ? "Все" : cat))}
+                  className="whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200"
+                  style={{
+                    background: activeCategory === cat ? "#a3e635" : "rgba(255,255,255,0.05)",
+                    color: activeCategory === cat ? "#071a0e" : "rgba(255,255,255,0.5)",
+                    border: activeCategory === cat ? "none" : "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Search Input (expandable) */}
-          <div
-            className="transition-all duration-300 ease-in-out overflow-hidden"
-            style={{
-              maxHeight: searchOpen ? "60px" : "0px",
-              opacity: searchOpen ? 1 : 0,
-              marginBottom: searchOpen ? "16px" : "0px",
-            }}
-          >
-            <div className="relative max-w-md mx-auto">
+          {/* ===== MOBILE ===== */}
+          <div className="flex flex-col md:hidden text-left">
+            <div className="relative mb-4">
               <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: "rgba(255,255,255,0.4)" }} />
               <input
                 value={searchQuery}
@@ -314,24 +366,91 @@ export default function EventsPage() {
                 }}
               />
             </div>
-          </div>
 
-          {/* Categories */}
-          <div className="flex items-center justify-center gap-2 pb-2 scrollbar-hide mx-auto" style={{ maxWidth: "100%" }}>
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className="whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200"
-                style={{
-                  background: activeCategory === cat ? "#a3e635" : "rgba(255,255,255,0.05)",
-                  color: activeCategory === cat ? "#071a0e" : "rgba(255,255,255,0.5)",
-                  border: activeCategory === cat ? "none" : "1px solid rgba(255,255,255,0.08)",
-                }}
-              >
-                {cat}
-              </button>
-            ))}
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>
+                {(() => {
+                  const parts: string[] = [];
+                  const df = DATE_FILTERS.find((f) => f.value === dateFilter);
+                  if (df && dateFilter !== "all") parts.push(df.label);
+                  if (activeCategory !== "Все") parts.push(activeCategory);
+                  return parts.length > 0 ? parts.join(" · ") : "Все события";
+                })()}
+              </span>
+              {hasFilters && (
+                <button
+                  onClick={resetFilters}
+                  className="text-xs font-medium transition-all hover:opacity-80"
+                  style={{ color: "#a3e635" }}
+                >
+                  Сбросить
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={() => setMobileFiltersOpen((prev) => !prev)}
+              className="flex items-center justify-center gap-2 w-full rounded-2xl py-3 mb-3 text-sm font-medium transition-all"
+              style={{
+                background: mobileFiltersOpen ? "rgba(163,230,53,0.1)" : "rgba(255,255,255,0.05)",
+                color: mobileFiltersOpen ? "#a3e635" : "rgba(255,255,255,0.6)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              <span>Фильтры</span>
+              <span className="transition-transform duration-200" style={{ transform: mobileFiltersOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+                ▼
+              </span>
+            </button>
+
+            <div
+              className="transition-all duration-300 ease-in-out overflow-hidden"
+              style={{
+                maxHeight: mobileFiltersOpen ? "400px" : "0px",
+                opacity: mobileFiltersOpen ? 1 : 0,
+              }}
+            >
+              <div className="rounded-2xl p-4 mb-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <p className="text-xs font-semibold mb-2 uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>
+                  Дата
+                </p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {DATE_FILTERS.filter((f) => f.value !== "all").map((f) => (
+                    <button
+                      key={f.value}
+                      onClick={() => setDateFilter((prev) => (prev === f.value ? "all" : f.value))}
+                      className="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200"
+                      style={{
+                        background: dateFilter === f.value ? "#a3e635" : "rgba(255,255,255,0.05)",
+                        color: dateFilter === f.value ? "#071a0e" : "rgba(255,255,255,0.5)",
+                        border: dateFilter === f.value ? "1px solid rgba(163,230,53,0.3)" : "1px solid rgba(255,255,255,0.1)",
+                      }}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs font-semibold mb-2 uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>
+                  Категория
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {CATEGORIES.filter((c) => c !== "Все").map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setActiveCategory((prev) => (prev === cat ? "Все" : cat))}
+                      className="whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200"
+                      style={{
+                        background: activeCategory === cat ? "#a3e635" : "rgba(255,255,255,0.05)",
+                        color: activeCategory === cat ? "#071a0e" : "rgba(255,255,255,0.5)",
+                        border: activeCategory === cat ? "none" : "1px solid rgba(255,255,255,0.08)",
+                      }}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -351,23 +470,22 @@ export default function EventsPage() {
                   key={ev.id}
                   whileHover={{ y: -4 }}
                   onClick={() => setSelected(ev)}
-                  className="relative rounded-3xl overflow-hidden cursor-pointer group"
-                  style={{ aspectRatio: "16/9", minHeight: "260px" }}
+                  className="relative rounded-3xl overflow-hidden cursor-pointer group aspect-[3/4] sm:aspect-[16/10] md:aspect-video"
                 >
                   <img src={ev.image} alt={ev.title} className="absolute inset-0 w-full h-full object-cover" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 30%, rgba(5,15,8,0.85) 100%)" }} />
 
-                  <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
+                  <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 md:p-8">
                     <span
                       className="inline-flex items-center gap-1 w-fit px-3 py-1 rounded-full text-xs font-semibold mb-3"
                       style={{ background: "rgba(163,230,53,0.15)", color: "#a3e635", border: "1px solid rgba(163,230,53,0.2)" }}
                     >
                       {ev.category}
                     </span>
-                    <h3 className="text-xl md:text-2xl font-black mb-2" style={{ color: "#ffffff", fontFamily: "'Unbounded', sans-serif" }}>
+                    <h3 className="text-base sm:text-xl md:text-2xl font-black mb-2 break-words" style={{ color: "#ffffff", fontFamily: "'Unbounded', sans-serif" }}>
                       {ev.title}
                     </h3>
-                    <div className="flex items-center gap-4 text-xs font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>
+                    <div className="flex items-center gap-2 sm:gap-4 text-xs font-medium flex-wrap" style={{ color: "rgba(255,255,255,0.6)" }}>
                       <span className="flex items-center gap-1"><Calendar size={14} /> {formatDate(ev.date)}</span>
                       <span className="flex items-center gap-1"><Clock size={14} /> {ev.time}</span>
                       {ev.price === null ? (
@@ -529,6 +647,7 @@ export default function EventsPage() {
           </Dialog>
         )}
       </AnimatePresence>
+      </div>
     </div>
   );
 }

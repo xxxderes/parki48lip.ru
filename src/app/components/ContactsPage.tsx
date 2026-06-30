@@ -1,10 +1,21 @@
 import { Phone, Mail, MapPin, Clock, Building2, User } from "lucide-react";
 import { TEAM } from "@/app/data/teamData";
+import { usePageReveal } from "@/app/hooks/useReveal";
 
 export function ContactsPage() {
+  const { ref, isVisible } = usePageReveal();
+
   return (
     <div className="min-h-screen w-full pt-[200px] pb-12 px-6 md:px-10 relative z-10" style={{ fontFamily: "'Inter', sans-serif", background: "rgba(5,15,8,0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}>
-      <div className="max-w-7xl mx-auto text-center">
+      <div
+        ref={ref}
+        className="max-w-7xl mx-auto text-center"
+        style={{
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? "translateY(0)" : "translateY(20px)",
+          transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
+        }}
+      >
         <div className="mb-8">
           <p className="text-xs uppercase tracking-widest font-semibold mb-4" style={{ color: "#a3e635", fontFamily: "'Unbounded', sans-serif" }}>
             МАУК «Культурные пространства Липецка»

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Map, Route, Clock, Ruler, ChevronDown, Play, X } from "lucide-react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { usePageReveal } from "@/app/hooks/useReveal";
 
 interface RoutePoint {
   name: string;
@@ -270,11 +271,28 @@ export function RoutesPage() {
     }
   };
 
+  const { ref, isVisible } = usePageReveal();
+
   return (
     <div
        className="min-h-screen w-full pt-[200px] relative overflow-hidden"
-       style={{ fontFamily: "'Inter', sans-serif", background: "rgba(5,15,8,0.35)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
-    >
+       style={{
+         fontFamily: "'Inter', sans-serif",
+         background: "rgba(5,15,8,0.35)",
+         backdropFilter: "blur(20px)",
+         WebkitBackdropFilter: "blur(20px)",
+       }}
+      >
+      <div
+        ref={ref}
+        className="relative z-10 px-6 md:px-10 pb-24"
+        style={{
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? "translateY(0)" : "translateY(20px)",
+          transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
+        }}
+      >
+      </div>
       {/* Map Overlay - shown when route is selected */}
       {selectedRoute && (
         <div className="fixed inset-0 z-50">
@@ -341,8 +359,15 @@ export function RoutesPage() {
         </div>
       )}
 
-      {/* Main Content */}
-      <div className="relative z-10 px-6 md:px-10 pb-24">
+      <div
+        ref={ref}
+        className="relative z-10 px-6 md:px-10 pb-24"
+        style={{
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? "translateY(0)" : "translateY(20px)",
+          transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
+        }}
+      >
         <div className="max-w-6xl mx-auto">
           <div className="mb-12 text-center">
             <p
@@ -370,9 +395,9 @@ export function RoutesPage() {
             </p>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-4 mb-8">
+          <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-8">
             <div
-              className="flex items-center rounded-2xl px-5 py-4 gap-3 flex-1"
+              className="flex items-center rounded-2xl px-4 md:px-5 py-3 md:py-4 gap-3 flex-1"
               style={{
                 background: "rgba(0,0,0,0.4)",
                 border: "1px solid rgba(255,255,255,0.15)",
@@ -383,17 +408,17 @@ export function RoutesPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Поиск по маршрутам, паркам..."
-                className="flex-1 bg-transparent text-base outline-none"
+                className="flex-1 bg-transparent text-sm md:text-base outline-none min-w-0"
                 style={{ color: "#e8f5e9", fontFamily: "'Inter', sans-serif" }}
               />
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {["Легкий", "Средний", "Сложный"].map((diff) => (
                 <button
                   key={diff}
                   onClick={() => setDifficultyFilter(difficultyFilter === diff ? null : diff)}
-                  className="px-4 py-2 rounded-xl text-xs font-medium transition-all"
+                  className="px-3 md:px-4 py-1.5 md:py-2 rounded-xl text-xs font-medium transition-all flex-shrink-0"
                   style={{
                     background:
                       difficultyFilter === diff
@@ -418,7 +443,7 @@ export function RoutesPage() {
             {filteredRoutes.map((route) => (
               <div
                 key={route.id}
-                className="rounded-3xl overflow-hidden transition-all duration-300 cursor-pointer"
+                className="rounded-3xl overflow-hidden transition-all duration-300 cursor-pointer max-w-full"
                 style={{
                   background: "rgba(255,255,255,0.05)",
                   backdropFilter: "blur(20px)",
@@ -433,12 +458,12 @@ export function RoutesPage() {
                   setSelectedRoute(selectedRoute?.id === route.id ? null : route)
                 }
               >
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
+                <div className="p-5 md:p-6">
+                  <div className="flex items-start justify-between gap-3 mb-3 md:mb-4">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
                         <span
-                          className="text-xs px-3 py-1 rounded-full font-medium"
+                          className="text-xs px-3 py-1 rounded-full font-medium flex-shrink-0"
                           style={{
                             background: `${DIFFICULTY_COLORS[route.difficulty]}20`,
                             color: DIFFICULTY_COLORS[route.difficulty],
@@ -449,24 +474,24 @@ export function RoutesPage() {
                         </span>
                       </div>
                       <h3
-                        className="text-lg font-bold mb-2"
+                        className="text-base md:text-lg font-bold mb-0 md:mb-1 break-words"
                         style={{ color: "#ffffff", fontFamily: "'Unbounded', sans-serif" }}
                       >
                         {route.name}
                       </h3>
                     </div>
                     <button
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all"
+                      className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all flex-shrink-0"
                       style={{
                         background: selectedRoute?.id === route.id ? route.color : "rgba(255,255,255,0.08)",
                         color: selectedRoute?.id === route.id ? "#0a1f0a" : "rgba(255,255,255,0.6)",
                       }}
                     >
-                      {selectedRoute?.id === route.id ? <X size={20} /> : <Play size={20} />}
+                      {selectedRoute?.id === route.id ? <X size={18} /> : <Play size={18} />}
                     </button>
                   </div>
 
-                  <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  <p className="text-sm mb-4 break-words" style={{ color: "rgba(255,255,255,0.5)" }}>
                     {route.description}
                   </p>
 

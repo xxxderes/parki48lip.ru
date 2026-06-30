@@ -169,9 +169,9 @@ function MemberCard({ member }: { member: TeamMember }) {
 
 export function TeamPage() {
   const { ref: headerRef, isVisible: headerVisible } = useScrollReveal(0);
-  const { ref: photoRef, isVisible: photoVisible } = useScrollReveal(200);
-  const { ref: quoteRef, isVisible: quoteVisible } = useScrollReveal(400);
-  const { ref: cardsRef, isVisible: cardsVisible } = useScrollReveal(600);
+  const { ref: photoRef, isVisible: photoVisible } = useScrollReveal(50);
+  const { ref: quoteRef, isVisible: quoteVisible } = useScrollReveal(100);
+  const { ref: cardsRef, isVisible: cardsVisible } = useScrollReveal(150);
 
   return (
     <div

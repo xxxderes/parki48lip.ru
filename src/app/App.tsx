@@ -238,8 +238,8 @@ function EventCalendar() {
                   )}
                 </div>
               </button>
-            </div>
-          );
+    </div>
+  );
         })}
       </div>
 
@@ -515,6 +515,7 @@ export default function App() {
   const [showEvents, setShowEvents] = useState(false);
   const [showParks, setShowParks] = useState(false);
   const [selectedParkId, setSelectedParkId] = useState<string | null>(null);
+  const [searchFlash, setSearchFlash] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const navItems = ["Главная", "Парки", "Маршруты", "События", "Новости", "Команда"];
@@ -697,6 +698,30 @@ export default function App() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Focus search input when redirected from another page
+  useEffect(() => {
+    if (location.state?.focusSearch) {
+      setSearchFlash(true);
+      const searchInput = document.querySelector('input[placeholder="Найти парк или событие..."]') as HTMLInputElement;
+      if (searchInput) {
+        setTimeout(() => {
+          searchInput.focus({ preventScroll: true });
+          searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+      }
+      // Clear the state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location]);
+
+  // Auto-dismiss search flash animation
+  useEffect(() => {
+    if (searchFlash) {
+      const timer = setTimeout(() => setSearchFlash(false), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [searchFlash]);
+
   useEffect(() => {
     fetch("https://api.open-meteo.com/v1/forecast?latitude=52.6031&longitude=39.5708&current_weather=true&current=rain,showers,snowfall")
       .then(res => res.json())
@@ -835,6 +860,12 @@ export default function App() {
                 color: "#fff",
               }}
               onClick={() => {
+                if (location.pathname !== '/') {
+                  setSearchFlash(true);
+                  navigate('/', { state: { focusSearch: true } });
+                  return;
+                }
+                setSearchFlash(true);
                 const searchInput = document.querySelector('input[placeholder="Найти парк или событие..."]') as HTMLInputElement;
                 if (searchInput) {
                   searchInput.focus({ preventScroll: true });
@@ -1037,11 +1068,18 @@ export default function App() {
             {/* Search — improved with pulsing glow */}
             <div className="relative mb-8 w-full md:max-w-md">
               <div
-                className="flex items-center rounded-2xl px-5 py-4 gap-3 transition-all duration-300 animate-search"
-                style={{
-                  background: "rgba(0,0,0,0.4)",
-                  border: "1px solid rgba(255,255,255,0.15)",
-                }}
+                className={`flex items-center rounded-2xl px-5 py-4 gap-3 transition-all duration-500 ${
+  searchFlash ? 'ring-[3px] ring-[#a3e635] border-[#a3e635] z-[40]' : 'border border-white/15'
+}`}
+style={{
+  background: "rgba(0,0,0,0.4)",
+  ...(searchFlash ? {
+    // Равномерное затухание от центра к краям
+    boxShadow: "0 0 80px 60px rgba(255, 255, 255, 0.61), 0 0 120px 60px rgba(163, 206, 114, 0.1)",
+  } : {
+    boxShadow: "none",
+  }),
+}}
               >
                 <Search size={18} style={{ color: "rgba(255,255,255,0.4)", flexShrink: 0 }} />
                 <input
@@ -1236,6 +1274,7 @@ export default function App() {
             ))}
           </div>
         </div>
+      
       </section>
         </>
       )}

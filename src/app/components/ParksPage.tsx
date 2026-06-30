@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { Search, MapPin, ArrowRight, Filter, Trees, Clock, Accessibility, Map, Wifi, Coffee, Bike, Baby } from "lucide-react";
+import { useScrollReveal } from "@/app/hooks/useReveal";
 
 const PARKS_DATA = [
   {
@@ -145,12 +146,28 @@ export function ParksPage({ onSelectPark }: ParksPageProps) {
     });
   }, [search, activeFilters]);
 
+  const { ref: headerRef, isVisible: headerVisible } = useScrollReveal(0);
+  const { ref: filtersRef, isVisible: filtersVisible } = useScrollReveal(100);
+  const { ref: cardsRef, isVisible: cardsVisible } = useScrollReveal(200);
+
   return (
     <div
       className="min-h-screen w-full pt-[200px] relative overflow-hidden"
-      style={{ fontFamily: "'Inter', sans-serif", background: "rgba(5,15,8,0.35)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
+      style={{
+        fontFamily: "'Inter', sans-serif",
+        background: "rgba(5,15,8,0.35)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+      }}
     >
-      <div className="relative z-10 px-6 md:px-10 pb-24">
+      <div
+        ref={headerRef}
+        className="relative z-10 px-6 md:px-10 transition-all duration-700 ease-out"
+        style={{
+          opacity: headerVisible ? 1 : 0,
+          transform: headerVisible ? "translateY(0)" : "translateY(30px)",
+        }}
+      >
         <div className="max-w-6xl mx-auto">
           {/* Заголовок */}
           <div className="mb-12 text-center">

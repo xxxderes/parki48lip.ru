@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { ChevronDown, Search, FileText, ExternalLink } from "lucide-react";
+import { usePageReveal } from "@/app/hooks/useReveal";
 
 interface Document {
   title: string;
@@ -108,11 +109,21 @@ export function DocumentsPage() {
 
   const isSearching = searchQuery.length > 0;
 
+  const { ref, isVisible } = usePageReveal();
+
   return (
     <div
       className="min-h-screen w-full pt-[200px] pb-24 px-6 md:px-10 relative z-10"
       style={{ fontFamily: "'Inter', sans-serif", background: "rgba(5,15,8,0.35)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
     >
+      <div
+        ref={ref}
+        style={{
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? "translateY(0)" : "translateY(20px)",
+          transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
+        }}
+      >
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-12 text-center">
@@ -331,6 +342,7 @@ export function DocumentsPage() {
             </a>
           </p>
         </div>
+      </div>
       </div>
     </div>
   );
