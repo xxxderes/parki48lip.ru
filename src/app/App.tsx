@@ -1,10 +1,16 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, ChevronLeft, ChevronRight, Clock, MapPin, Wind, Sun, ArrowRight, Trees } from "lucide-react";
+import { useLocation, useNavigate, Link } from "react-router";
+import { Search, ChevronLeft, ChevronRight, Clock, MapPin, Wind, Sun, ArrowRight, Trees, Home, TreePine, Map, Calendar, Newspaper, Users, FileText, Phone, Info, HeartHandshake } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/app/components/ui/dialog";
 import { DocumentsPage } from "@/app/components/DocumentsPage";
 import { ContactsPage } from "@/app/components/ContactsPage";
 import { TeamPage } from "@/app/components/TeamPage";
+import { RoutesPage } from "@/app/components/RoutesPage";
+
+import EventsPage from "@/app/components/EventsPage";
+import { ParksPage } from "@/app/components/ParksPage";
+import { ParkDetailPage } from "@/app/components/ParkDetailPage";
 import logoImg from "@/imports/logo.png";
 
 import pravoGov from "@/imports/Pravo.gov.ru_-_герб.png";
@@ -99,6 +105,8 @@ function EventCalendar() {
   const [month, setMonth] = useState(today.getMonth());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [eventModalOpen, setEventModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<{ title: string; time: string; park: string; description: string } | null>(null);
 
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfMonth(year, month);
@@ -314,7 +322,8 @@ function EventCalendar() {
                       background: "rgba(0,0,0,0.25)",
                     }}
                     onClick={() => {
-                      alert(`Описание:\n\n${ev.description ? ev.description : "Описание не найдено :("}`);
+                      setSelectedEvent(ev);
+                      setEventModalOpen(true);
                     }}
                   >
                     <h4 className="text-sm font-bold mb-2 leading-snug" style={{ color: "#e8f5e9", fontFamily: "'Unbounded', sans-serif" }}>
@@ -337,6 +346,58 @@ function EventCalendar() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Event Detail Modal */}
+      <Dialog open={eventModalOpen} onOpenChange={setEventModalOpen}>
+        <DialogContent
+          showCloseButton={false}
+          className="rounded-3xl w-full max-w-lg p-0 overflow-hidden"
+          style={{
+            background: "rgba(255,255,255,0.07)",
+            backdropFilter: "blur(32px)",
+            WebkitBackdropFilter: "blur(32px)",
+            border: "1px solid rgba(163,230,53,0.2)",
+            boxShadow: "0 24px 80px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
+            maxHeight: "85vh",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <button
+            onClick={() => setEventModalOpen(false)}
+            className="absolute top-4 right-4 w-11 h-11 rounded-full flex items-center justify-center z-10 transition-all hover:scale-110 active:scale-95 hover:bg-white/15"
+            style={{
+              background: "rgba(255,255,255,0.08)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round">
+              <path d="M1 1l10 10M11 1L1 11"/>
+            </svg>
+          </button>
+          {selectedEvent && (
+            <div className="p-6 overflow-y-auto" style={{ flex: 1 }}>
+              <h3 className="text-xl font-black mb-2 pr-8" style={{ color: "#a3e635", fontFamily: "'Unbounded', sans-serif" }}>
+                {selectedEvent.title}
+              </h3>
+              <div className="flex flex-wrap items-center gap-4 mb-4">
+                <span className="flex items-center gap-1.5 text-xs" style={{ color: "#4ade80" }}>
+                  <Clock size={12} /> {selectedEvent.time}
+                </span>
+                <span className="flex items-center gap-1.5 text-xs" style={{ color: "#86b892" }}>
+                  <MapPin size={12} /> {selectedEvent.park}
+                </span>
+              </div>
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "'Inter', sans-serif" }}>
+                {selectedEvent.description}
+              </p>
             </div>
           )}
         </DialogContent>
@@ -447,33 +508,178 @@ export default function App() {
   const [videoReady, setVideoReady] = useState(false);
   const [navActive, setNavActive] = useState("Главная");
   const [weather, setWeather] = useState<{ temp: number; isDay: number; rain: number; showers: number; snowfall: number; weatherCode: number } | null>(null);
-  const navItems = ["Главная", "Парки", "Маршруты", "Афиша", "Новости", "Команда", "Документы", "Контакты"];
   const [showDocs, setShowDocs] = useState(false);
   const [showContacts, setShowContacts] = useState(false);
   const [showTeam, setShowTeam] = useState(false);
+  const [showRoutes, setShowRoutes] = useState(false);
+  const [showEvents, setShowEvents] = useState(false);
+  const [showParks, setShowParks] = useState(false);
+  const [selectedParkId, setSelectedParkId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const navItems = ["Главная", "Парки", "Маршруты", "События", "Новости", "Команда"];
+  const extraNavItems = ["Документы", "Контакты"];
 
   useEffect(() => {
-   if (navActive === "Документы") {
+    const path = location.pathname;
+    if (path === "/documents") {
+      setNavActive("Документы");
       setShowDocs(true);
       setShowContacts(false);
       setShowTeam(false);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } else if (navActive === "Контакты") {
+      setShowRoutes(false);
+      setShowEvents(false);
+      setShowParks(false);
+      setSelectedParkId(null);
+      document.title = "Документы — Парки Липецка";
+    } else if (path === "/events") {
+      setNavActive("События");
+      setShowDocs(false);
+      setShowContacts(false);
+      setShowTeam(false);
+      setShowRoutes(false);
+      setShowEvents(true);
+      setShowParks(false);
+      setSelectedParkId(null);
+      document.title = "События — Парки Липецка";
+    } else if (path === "/contacts") {
+      setNavActive("Контакты");
       setShowDocs(false);
       setShowContacts(true);
       setShowTeam(false);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } else if (navActive === "Команда") {
+      setShowRoutes(false);
+      setShowEvents(false);
+      setShowParks(false);
+      setSelectedParkId(null);
+      document.title = "Контакты — Парки Липецка";
+    } else if (path === "/team") {
+      setNavActive("Команда");
       setShowDocs(false);
       setShowContacts(false);
       setShowTeam(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
+      setShowRoutes(false);
+      setShowEvents(false);
+      setShowParks(false);
+      setSelectedParkId(null);
+      document.title = "Команда — Парки Липецка";
+    } else if (path === "/routes") {
+      setNavActive("Маршруты");
       setShowDocs(false);
       setShowContacts(false);
       setShowTeam(false);
+      setShowRoutes(true);
+      setShowEvents(false);
+      setShowParks(false);
+      setSelectedParkId(null);
+      document.title = "Маршруты — Парки Липецка";
+    } else if (path === "/parks") {
+      setNavActive("Парки");
+      setShowDocs(false);
+      setShowContacts(false);
+      setShowTeam(false);
+      setShowRoutes(false);
+      setShowEvents(false);
+      setShowParks(true);
+      setSelectedParkId(null);
+      document.title = "Парки — Парки Липецка";
+    } else if (path.startsWith("/park/")) {
+      const parkId = path.split("/")[2];
+      setNavActive("Парки");
+      setShowDocs(false);
+      setShowContacts(false);
+      setShowTeam(false);
+      setShowRoutes(false);
+      setShowEvents(false);
+      setShowParks(false);
+      setSelectedParkId(parkId || null);
+      document.title = parkId ? parkId + " — Парки Липецка" : "Парки — Парки Липецka";
+    } else {
+      setNavActive("Главная");
+      setShowDocs(false);
+      setShowContacts(false);
+      setShowTeam(false);
+      setShowRoutes(false);
+      setShowEvents(false);
+      setShowParks(false);
+      setSelectedParkId(null);
+      document.title = "Парки Липецка — культурные пространства и события города"; }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [location.pathname]);
+
+  const handleNavClick = (item: string) => {
+    setNavActive(item);
+    if (item === "Документы") {
+      navigate("/documents");
+      setShowDocs(true);
+      setShowContacts(false);
+      setShowTeam(false);
+      setShowRoutes(false);
+      setShowEvents(false);
+      setShowParks(false);
+      setSelectedParkId(null);
+      document.title = "Документы — Парки Липецка";
+    } else if (item === "Контакты") {
+      navigate("/contacts");
+      setShowDocs(false);
+      setShowContacts(true);
+      setShowTeam(false);
+      setShowRoutes(false);
+      setShowEvents(false);
+      setShowParks(false);
+      setSelectedParkId(null);
+      document.title = "Контакты — Парки Лipецka";
+    } else if (item === "Команда") {
+      navigate("/team");
+      setShowDocs(false);
+      setShowContacts(false);
+      setShowTeam(true);
+      setShowRoutes(false);
+      setShowEvents(false);
+      setShowParks(false);
+      setSelectedParkId(null);
+      document.title = "Команда — Парки Липецка";
+    } else if (item === "Маршруты") {
+      navigate("/routes");
+      setShowDocs(false);
+      setShowContacts(false);
+      setShowTeam(false);
+      setShowRoutes(true);
+      setShowEvents(false);
+      setShowParks(false);
+      setSelectedParkId(null);
+      document.title = "Маршруты — Парки Липецка";
+    } else if (item === "События") {
+      navigate("/events");
+      setShowDocs(false);
+      setShowContacts(false);
+      setShowTeam(false);
+      setShowRoutes(false);
+      setShowEvents(true);
+      setShowParks(false);
+      setSelectedParkId(null);
+      document.title = "События — Парки Липецка";
+    } else if (item === "Парки") {
+      navigate("/parks");
+      setShowDocs(false);
+      setShowContacts(false);
+      setShowTeam(false);
+      setShowRoutes(false);
+      setShowEvents(false);
+      setShowParks(true);
+      setSelectedParkId(null);
+      document.title = "Парки — Парки Липецка";
+    } else {
+      navigate("/");
+      setShowDocs(false);
+      setShowContacts(false);
+      setShowTeam(false);
+      setShowRoutes(false);
+      setShowEvents(false);
+      setShowParks(false);
+      setSelectedParkId(null);
+      document.title = "Парки Липецка — культурные пространства и события города";
     }
-  }, [navActive]);
+  };
 
   useEffect(() => {
     const onScroll = () => {
@@ -575,6 +781,13 @@ export default function App() {
         />
       </div>
 
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
+
       {/* NAV — original design, expands on menu open */}
       <nav
         className="fixed top-0 left-0 right-0 z-50 px-6 py-3 md:top-4 md:left-4 md:right-4 md:px-10 md:py-3 transition-all duration-500 overflow-hidden rounded-b-2xl md:rounded-2xl"
@@ -594,17 +807,17 @@ export default function App() {
             className="h-12 w-auto object-contain"
           />
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-4">
             {navItems.map(item => (
               <button
                 key={item}
-                onClick={() => setNavActive(item)}
-                className="px-4 py-2 rounded-xl text-xs font-medium transition-all duration-200"
+                onClick={() => handleNavClick(item)}
+                data-active={navActive === item}
+                className="font-semibold transition-all duration-200 tracking-widest uppercase text-[13px] text-white/55 hover:text-[15px] hover:text-white/90 data-[active=true]:text-[15px] data-[active=true]:text-[#a3e635] data-[active=true]:hover:text-[#a3e635]"
                 style={{
                   fontFamily: "'Inter', sans-serif",
-                  color: navActive === item ? "#a3e635" : "rgba(255,255,255,0.5)",
-                  background: navActive === item ? "rgba(163,230,53,0.1)" : "transparent",
-                  border: navActive === item ? "1px solid rgba(163,230,53,0.2)" : "1px solid transparent",
+                  background: "transparent",
+                  border: "none",
                 }}
               >
                 {item}
@@ -664,48 +877,138 @@ export default function App() {
           </div>
         </div>
 
-        {/* Expanded menu links - appears below main nav on all screens */}
-        <div
-          style={{
-            maxHeight: menuOpen ? "400px" : "0",
-            opacity: menuOpen ? 1 : 0,
-            overflow: "hidden",
-            transition: "all 0.5s ease",
-          }}
-        >
-          <div className="flex flex-col gap-3 pt-4 mt-4 px-2 md:px-0" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-            {navItems.map(item => (
-              <button
-                key={item}
-                onClick={() => {
-                  setNavActive(item);
-                  setMenuOpen(false);
-                }}
-                className="text-sm font-medium transition-all duration-200 hover:text-white text-left"
-                style={{
-                  fontFamily: "'Inter', sans-serif",
-                  color: navActive === item ? "#a3e635" : "rgba(255,255,255,0.5)",
-                }}
-              >
-                {item}
-              </button>
-            ))}
-            <div className="flex flex-col gap-3 pt-3 mt-1" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-              <a href="#" onClick={(e) => { e.preventDefault(); setMenuOpen(false); }} className="text-sm font-medium transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.5)", fontFamily: "'Inter', sans-serif" }}>О проекте</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setMenuOpen(false); }} className="text-sm font-medium transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.5)", fontFamily: "'Inter', sans-serif" }}>Контакты</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setMenuOpen(false); }} className="text-sm font-medium transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.5)", fontFamily: "'Inter', sans-serif" }}>Волонтёрам</a>
+        {menuOpen && (
+          <div className="pt-4 mt-4 max-h-[70vh] overflow-y-auto" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Колонка 1 — Навигация */}
+              <div>
+                <p className="text-[10px] uppercase tracking-widest font-semibold mb-3" style={{ color: "rgba(255,255,255,0.35)", fontFamily: "'Inter', sans-serif" }}>
+                  Навигация
+                </p>
+                <div className="flex flex-col gap-1">
+                  {[
+                    { label: "Главная", icon: Home, href: "/" },
+                    { label: "Парки", icon: TreePine, href: "/parks" },
+                    { label: "Маршруты", icon: Map, href: "/routes" },
+                    { label: "События", icon: Calendar, href: "/events" },
+                    { label: "Новости", icon: Newspaper, href: "#news" },
+                  ].map((item, i) => {
+                    const Icon = item.icon;
+                    const isActive = navActive === item.label;
+                    return (
+                      <button
+                        key={item.label + i}
+                        onClick={() => {
+                          if (item.href.startsWith("#")) {
+                            setMenuOpen(false);
+                          } else {
+                            navigate(item.href);
+                            setMenuOpen(false);
+                          }
+                        }}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-left group"
+                        style={{
+                          background: isActive ? "rgba(163,230,53,0.12)" : "transparent",
+                        }}
+                      >
+                        <Icon size={16} style={{ color: isActive ? "#a3e635" : "rgba(255,255,255,0.4)" }} className="flex-shrink-0 transition-colors group-hover:text-white" />
+                        <span className="text-sm font-medium" style={{ color: isActive ? "#a3e635" : "rgba(255,255,255,0.7)", fontFamily: "'Inter', sans-serif" }}>
+                          {item.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Колонка 2 — Сервисы */}
+              <div>
+                <p className="text-[10px] uppercase tracking-widest font-semibold mb-3" style={{ color: "rgba(255,255,255,0.35)", fontFamily: "'Inter', sans-serif" }}>
+                  Сервисы
+                </p>
+                <div className="flex flex-col gap-1">
+                  {[
+                    { label: "Команда", icon: Users, href: "/team" },
+                    { label: "Документы", icon: FileText, href: "/documents" },
+                    { label: "Контакты", icon: Phone, href: "/contacts" },
+                  ].map((item, i) => {
+                    const Icon = item.icon;
+                    const isActive = navActive === item.label;
+                    return (
+                      <button
+                        key={item.label + i}
+                        onClick={() => {
+                          navigate(item.href);
+                          setMenuOpen(false);
+                        }}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-left group"
+                        style={{
+                          background: isActive ? "rgba(163,230,53,0.12)" : "transparent",
+                        }}
+                      >
+                        <Icon size={16} style={{ color: isActive ? "#a3e635" : "rgba(255,255,255,0.4)" }} className="flex-shrink-0 transition-colors group-hover:text-white" />
+                        <span className="text-sm font-medium" style={{ color: isActive ? "#a3e635" : "rgba(255,255,255,0.7)", fontFamily: "'Inter', sans-serif" }}>
+                          {item.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Колонка 3 — Информация */}
+              <div>
+                <p className="text-[10px] uppercase tracking-widest font-semibold mb-3" style={{ color: "rgba(255,255,255,0.35)", fontFamily: "'Inter', sans-serif" }}>
+                  Информация
+                </p>
+                <div className="flex flex-col gap-1">
+                  {[
+                    { label: "О проекте", icon: Info, href: "#about" },
+                    { label: "Волонтёрам", icon: HeartHandshake, href: "#volunteer" },
+                  ].map((item, i) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.label + i}
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-left group"
+                        style={{ background: "transparent" }}
+                      >
+                        <Icon size={16} style={{ color: "rgba(255,255,255,0.4)" }} className="flex-shrink-0 transition-colors group-hover:text-white" />
+                        <span className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "'Inter', sans-serif" }}>
+                          {item.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+
+                  {/* Заглушка для будущих ссылок — можно удалить */}
+                  <div className="mt-2 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                    <p className="text-[10px] px-3" style={{ color: "rgba(255,255,255,0.2)", fontFamily: "'Inter', sans-serif" }}>
+                      + будущие разделы...
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </nav>
 
-      {showDocs ? (
-        <DocumentsPage />
-      ) : showContacts ? (
-        <ContactsPage />
-      ) : showTeam ? (
-        <TeamPage />
-      ) : (
+      {showDocs && <DocumentsPage />}
+      {showContacts && <ContactsPage />}
+      {showTeam && <TeamPage />}
+      {showRoutes && <RoutesPage />}
+      {showEvents && <EventsPage />}
+      {showParks && <ParksPage onSelectPark={(id) => {
+        setSelectedParkId(id);
+        navigate(`/park/${id}`);
+      }} />}
+      {selectedParkId && <ParkDetailPage parkId={selectedParkId} onBack={() => {
+        setSelectedParkId(null);
+        navigate('/parks');
+      }} />}
+      {!showDocs && !showContacts && !showTeam && !showRoutes && !showEvents && !showParks && !selectedParkId && (
         <>
           {/* HERO — Adaptive height: temperature always visible */}
           <section className="relative z-10 px-6 md:px-10 pt-12 md:pt-[24vh] pb-10 overflow-hidden md:overflow-visible">
@@ -736,8 +1039,8 @@ export default function App() {
               <div
                 className="flex items-center rounded-2xl px-5 py-4 gap-3 transition-all duration-300 animate-search"
                 style={{
-                  background: "rgba(30, 60, 30, 0.7)",
-                  border: query ? "1px solid rgba(74,222,128,0.4)" : "1px solid rgba(74,222,128,0.2)",
+                  background: "rgba(0,0,0,0.4)",
+                  border: "1px solid rgba(255,255,255,0.15)",
                 }}
               >
                 <Search size={18} style={{ color: "rgba(255,255,255,0.4)", flexShrink: 0 }} />
@@ -778,12 +1081,13 @@ export default function App() {
             {/* CTA */}
                <div className="flex gap-3 flex-col md:flex-row">
               <button
+                onClick={() => navigate("/parks")}
                 className="hidden md:inline-flex px-6 py-4 rounded-2xl text-sm font-bold transition-all duration-200 hover:scale-105 active:scale-95"
                 style={{
                   background: "rgba(255,255,255,0.08)",
                   backdropFilter: "blur(12px)",
                   color: "#ffffff",
-                  fontFamily: "'Unbounded', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: "13px",
                   letterSpacing: "0.02em",
                   border: "1px solid rgba(255,255,255,0.15)",
@@ -791,19 +1095,22 @@ export default function App() {
               >
                 НАШИ ПАРКИ
               </button>
-               <button
-                className="w-full md:w-auto px-6 py-4 rounded-2xl text-sm font-bold transition-all duration-200 hover:scale-105 active:scale-95 text-center"
+               <a
+                href="https://lipeck.go2sport.ru/clubs/zelenyy-ostrov/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full md:w-auto px-6 py-4 rounded-2xl text-sm font-bold transition-all duration-200 hover:scale-105 active:scale-95 text-center inline-flex items-center justify-center"
                 style={{
                   background: "#8dc43f",
                   color: "#0a1f0a",
-                  fontFamily: "'Unbounded', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: "13px",
                   letterSpacing: "0.02em",
                   textTransform: "uppercase",
                 }}
               >
                 ЗАБРОНИРОВАТЬ ПЛОЩАДКУ
-              </button>
+              </a>
             </div>
 
             {/* Weather info after button */}
@@ -930,26 +1237,9 @@ export default function App() {
           </div>
         </div>
       </section>
-      {/* FOOTER */}
-      <footer className="relative z-10 px-6 md:px-10 py-8 mt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <ImageWithFallback
-            src={logoImg}
-            alt="Культурные пространства Липецка"
-            className="h-16 w-auto object-contain"
-            style={{ filter: "brightness(0) invert(1)", opacity: 0.4 }}
-          />
-          <div className="flex items-center gap-6">
-            {["О проекте", "Контакты", "Волонтёрам"].map(item => (
-              <a key={item} href="#" className="text-xs transition-colors hover:text-white/60" style={{ color: "rgba(255,255,255,0.3)", fontFamily: "'Inter', sans-serif" }}>
-                {item}
-              </a>
-            ))}
-          </div>
-        </div>
-      </footer>
         </>
       )}
+
     </div>
   );
 }

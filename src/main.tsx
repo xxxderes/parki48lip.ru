@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router";
 import App from "./app/App.tsx";
 import "./styles/index.css";
 
@@ -66,7 +67,7 @@ window.addEventListener("load", () => {
 // Catch any rendering errors and still hide preloader
 try {
   const root = createRoot(document.getElementById("root")!);
-  root.render(<App />);
+  root.render(<BrowserRouter><App /></BrowserRouter>);
   updateProgress(92, "Отрисовка интерфейса...");
 } catch (err) {
   console.error("App render error:", err);

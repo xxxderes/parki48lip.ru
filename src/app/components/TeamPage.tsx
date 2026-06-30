@@ -1,74 +1,33 @@
-import { useState } from "react";
-import { Mail, Phone, Briefcase } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Mail, Phone } from "lucide-react";
 import logoImg from "@/imports/logo.png";
-import sitnikovImg from "@/imports/sitnikov.webp";
-import chernikovImg from "@/imports/vladimirvladimirovich.jpg";
-import zhidkovImg from "@/imports/ZhidkovVyacheslavIgorevich.jpg";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
+import { TEAM } from "@/app/data/teamData";
+import type { TeamMember } from "@/app/data/teamData";
 
-interface TeamMember {
-  name: string;
-  role: string;
-  email?: string;
-  phone?: string;
-  img?: string;
-  initials: string;
+function useScrollReveal(delay = 0) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => setIsVisible(true), delay);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return { ref, isVisible };
 }
-
-const TEAM: TeamMember[] = [
-  {
-    name: "Ситников Олег Николаевич",
-    role: "Директор",
-    email: "park48lip@ya.ru",
-    phone: "+7 (4742) 56-60-01",
-    img: sitnikovImg,
-    initials: "СО",
-  },
-  {
-    name: "Черников Владимир Владимирович",
-    role: "Первый заместитель директора",
-    email: "park48lip@ya.ru",
-    img: chernikovImg,
-    initials: "ЧВ",
-  },
-  {
-    name: "Меляков Алексей Васильевич",
-    role: "Заместитель директора по содержанию территорий",
-    email: "park48lip@ya.ru",
-    initials: "МА",
-  },
-  {
-    name: "Демин Дмитрий Александрович",
-    role: "Заместитель директора по культурно-досуговой деятельности",
-    email: "park48lip@ya.ru",
-    initials: "ДД",
-  },
-  {
-    name: "Сальникова Виктория Викторовна",
-    role: "Главный бухгалтер",
-    email: "park48lip@ya.ru",
-    initials: "СВ",
-  },
-  {
-    name: "Жидков Вячеслав Игоревич",
-    role: "Главный инженер",
-    email: "park48lip@ya.ru",
-    img: zhidkovImg,
-    initials: "ЖВ",
-  },
-  {
-    name: "Грозных Анна Сергеевна",
-    role: "Начальник отдела материально-технического обеспечения",
-    email: "park48lip@ya.ru",
-    initials: "ГА",
-  },
-  {
-    name: "Соболева Анна Павловна",
-    role: "Начальник отдела по содержанию территорий",
-    email: "park48lip@ya.ru",
-    initials: "СА",
-  },
-];
 
 function AvatarPlaceholder({ initials }: { initials: string }) {
   return (
@@ -92,160 +51,258 @@ function AvatarPlaceholder({ initials }: { initials: string }) {
   );
 }
 
-function MemberCard({ member, index }: { member: TeamMember; index: number }) {
+function MemberCard({ member }: { member: TeamMember }) {
   const [hovered, setHovered] = useState(false);
+  const { ref, isVisible } = useScrollReveal();
 
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="rounded-2xl overflow-hidden transition-all duration-500 flex flex-col md:flex-row"
+      ref={ref}
+      className="transition-all duration-500"
       style={{
-        background: "rgba(255,255,255,0.05)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        border: hovered ? "1px solid rgba(74,222,128,0.35)" : "1px solid rgba(255,255,255,0.08)",
-        boxShadow: hovered ? "0 20px 60px rgba(0,0,0,0.5)" : "0 8px 30px rgba(0,0,0,0.3)",
-        transform: hovered ? "translateY(-4px)" : "translateY(0)",
+        transform: isVisible ? "translateY(0)" : "translateY(20px)",
+        opacity: isVisible ? 1 : 0,
       }}
     >
-      {/* Photo area */}
+      {/* Photo area — портретный формат, крупный */}
       <div
-        className="relative w-full md:w-[200px] lg:w-[240px] flex-shrink-0 overflow-hidden"
-        style={{ height: "260px", minHeight: "260px" }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className="relative w-full overflow-hidden cursor-pointer"
+        style={{
+          paddingBottom: "130%",
+          borderRadius: "12px",
+          background: "rgba(15, 25, 18, 0.5)",
+        }}
       >
         {member.img ? (
           <img
             src={member.img}
             alt={member.name}
-            className="w-full h-full object-cover transition-transform duration-700"
-            style={{ transform: hovered ? "scale(1.05)" : "scale(1)" }}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
+            style={{
+              transform: hovered ? "scale(1.05)" : "scale(1)",
+              transition: "transform 0.7s ease",
+              borderRadius: "12px",
+            }}
           />
         ) : (
-          <AvatarPlaceholder initials={member.initials} />
+          <div className="absolute inset-0">
+            <AvatarPlaceholder initials={member.initials} />
+          </div>
         )}
-        {/* Subtle gradient overlay */}
+        {/* Hover overlay */}
         <div
-          className="absolute inset-0 pointer-events-none md:hidden"
+          className="absolute inset-0 transition-all duration-500 pointer-events-none"
           style={{
-            background: "linear-gradient(to bottom, transparent 50%, rgba(5,15,8,0.6) 100%)",
+            background: hovered
+              ? "linear-gradient(to bottom, transparent 0%, rgba(163,230,53,0.08) 100%)"
+              : "transparent",
           }}
         />
       </div>
 
-      {/* Content */}
-      <div className="flex-1 flex flex-col justify-between p-5 md:p-6">
-        <div>
-          <h3
-            className="font-bold leading-tight mb-2"
+      {/* Info BELOW the photo */}
+      <div className="pt-4">
+        <h3
+          className="font-bold uppercase tracking-wide"
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            fontSize: "14px",
+            color: "#ffffff",
+            lineHeight: 1.3,
+            marginBottom: "6px",
+            height: "18px",
+            overflow: "hidden",
+          }}
+        >
+          {member.name}
+        </h3>
+        <p
+          className="text-sm"
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            color: "rgba(255,255,255,0.7)",
+            lineHeight: 1.4,
+            marginBottom: "6px",
+            height: "20px",
+            overflow: "hidden",
+          }}
+        >
+          {member.role}
+        </p>
+        {member.email && (
+          <a
+            href={`mailto:${member.email}`}
+            className="block text-sm"
             style={{
-              fontFamily: "'Unbounded', sans-serif",
-              fontSize: "18px",
               color: "#ffffff",
-              letterSpacing: "-0.01em",
+              textDecoration: "underline",
+              fontFamily: "'Inter', sans-serif",
+              marginBottom: "2px",
+              height: "18px",
+              overflow: "hidden",
             }}
           >
-            {member.name}
-          </h3>
-          <div className="flex items-center gap-2 mb-4">
-            <Briefcase size={14} style={{ color: "#a3e635" }} />
-            <p
-              className="text-xs font-medium"
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                color: "rgba(255,255,255,0.6)",
-              }}
-            >
-              {member.role}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          {member.email && (
-            <a
-              href={`mailto:${member.email}`}
-              className="flex items-center gap-2.5 text-xs transition-colors hover:text-white group"
-              style={{ color: "rgba(255,255,255,0.45)" }}
-            >
-              <Mail size={14} className="flex-shrink-0" style={{ color: "#a3e635" }} />
-              <span className="group-hover:text-[#a3e635] transition-colors">
-                {member.email}
-              </span>
-            </a>
-          )}
-          {member.phone && (
-            <a
-              href={`tel:${member.phone.replace(/[^\d+]/g, "")}`}
-              className="flex items-center gap-2.5 text-xs transition-colors hover:text-white group"
-              style={{ color: "rgba(255,255,255,0.45)" }}
-            >
-              <Phone size={14} className="flex-shrink-0" style={{ color: "#a3e635" }} />
-              <span className="group-hover:text-[#a3e635] transition-colors">
-                {member.phone}
-              </span>
-            </a>
-          )}
-        </div>
+            {member.email}
+          </a>
+        )}
+        {member.phone && (
+          <a
+            href={`tel:${member.phone.replace(/[^\d+]/g, "")}`}
+            className="block text-sm hover:no-underline"
+            style={{
+              color: "#ffffff",
+              textDecoration: "underline",
+              fontFamily: "'Inter', sans-serif",
+              height: "18px",
+              overflow: "hidden",
+            }}
+          >
+            {member.phone}
+          </a>
+        )}
       </div>
     </div>
   );
 }
 
 export function TeamPage() {
+  const { ref: headerRef, isVisible: headerVisible } = useScrollReveal(0);
+  const { ref: photoRef, isVisible: photoVisible } = useScrollReveal(200);
+  const { ref: quoteRef, isVisible: quoteVisible } = useScrollReveal(400);
+  const { ref: cardsRef, isVisible: cardsVisible } = useScrollReveal(600);
+
   return (
     <div
-      className="min-h-screen w-full py-24 px-6 md:px-10 relative z-10"
+      className="min-h-screen w-full pt-[200px] pb-24 relative z-10"
       style={{
         fontFamily: "'Inter', sans-serif",
-        background: "rgba(5,15,8,0.92)",
-        paddingTop: "160px",
+        background: "rgba(5,15,8,0.35)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
       }}
     >
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="mb-12">
+      {/* HEADER: Заголовок + Слоган */}
+      <div
+        ref={headerRef}
+        className="px-6 md:px-10 mb-12 transition-all duration-700 ease-out"
+        style={{
+          opacity: headerVisible ? 1 : 0,
+          transform: headerVisible ? "translateY(0)" : "translateY(30px)",
+        }}
+      >
+        <div className="max-w-7xl mx-auto text-center">
           <p
-            className="text-xs uppercase tracking-widest font-semibold mb-3"
+            className="text-xs uppercase tracking-widest font-semibold mb-4"
             style={{ color: "#a3e635", fontFamily: "'Unbounded', sans-serif" }}
           >
             МАУК «Культурные пространства Липецка»
           </p>
           <h1
-            className="text-3xl md:text-4xl font-black mb-4"
+            className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 uppercase"
             style={{
               color: "#ffffff",
               fontFamily: "'Unbounded', sans-serif",
               letterSpacing: "-0.02em",
+              lineHeight: 1.1,
             }}
           >
             Наша команда
           </h1>
           <p
-            className="text-sm max-w-2xl leading-relaxed"
+            className="text-base md:text-lg max-w-2xl mx-auto leading-relaxed"
             style={{
               color: "rgba(255,255,255,0.5)",
               fontFamily: "'Inter', sans-serif",
             }}
           >
-            Профессионалы, создающие комфортную городскую среду и культурную жизнь парков Липецка
+            Создаём комфортную городскую среду и культурную жизнь парков Липецка
           </p>
         </div>
+      </div>
 
-        {/* Team list */}
-        <div className="flex flex-col gap-4">
-          {TEAM.map((member, index) => (
-            <MemberCard key={member.name} member={member} index={index} />
-          ))}
+      {/* FULL-WIDTH PHOTO */}
+      <div
+        ref={photoRef}
+        className="px-6 md:px-10 mb-8 transition-all duration-700 ease-out"
+        style={{
+          opacity: photoVisible ? 1 : 0,
+          transform: photoVisible ? "translateY(0)" : "translateY(30px)",
+        }}
+      >
+        <div className="max-w-7xl mx-auto">
+          <div
+            className="relative w-full overflow-hidden rounded-2xl flex items-center justify-center"
+            style={{
+              height: "clamp(200px, 30vw, 400px)",
+              background: "linear-gradient(135deg, rgba(74,222,128,0.1) 0%, rgba(45,212,191,0.05) 100%)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
+          >
+            <p
+              className="text-sm uppercase tracking-widest font-semibold"
+              style={{
+                color: "rgba(255,255,255,0.3)",
+                fontFamily: "'Unbounded', sans-serif",
+              }}
+            >
+              Общее фото команды
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* QUOTE */}
+      <div
+        ref={quoteRef}
+        className="px-6 md:px-10 mb-16 transition-all duration-700 ease-out"
+        style={{
+          opacity: quoteVisible ? 1 : 0,
+          transform: quoteVisible ? "translateY(0)" : "translateY(30px)",
+        }}
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="w-full flex justify-end">
+            <p
+              className="text-lg md:text-xl lg:text-2xl leading-relaxed font-medium"
+              style={{
+                color: "#ffffff",
+                fontFamily: "'Inter', sans-serif",
+                maxWidth: "600px",
+              }}
+            >
+              Мы верим, что парки — это места, где рождаются эмоции. И делаем всё, чтобы каждый визит оставил светлые воспоминания
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* TEAM GRID */}
+      <div
+        ref={cardsRef}
+        className="px-6 md:px-10 mb-16 transition-all duration-700 ease-out"
+        style={{
+          opacity: cardsVisible ? 1 : 0,
+          transform: cardsVisible ? "translateY(0)" : "translateY(30px)",
+        }}
+      >
+        <div className="max-w-7xl mx-auto">
+          {/* Grid: 4 на ПК, 3 на lg, 2 на md, 1 на мобильном */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+            {TEAM.map((member, index) => (
+              <MemberCard key={member.name} member={member} />
+            ))}
+          </div>
         </div>
       </div>
 
       {/* FOOTER */}
       <footer
-        className="relative z-10 px-6 md:px-10 py-8 mt-4"
+        className="relative z-10 px-6 md:px-10 py-8"
         style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
       >
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <ImageWithFallback
             src={logoImg}
             alt="Культурные пространства Липецка"

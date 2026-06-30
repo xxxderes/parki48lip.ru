@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ChevronDown, Search, FileText, ExternalLink } from "lucide-react";
 
 interface Document {
@@ -72,58 +72,128 @@ const CATEGORIES: Category[] = [
   },
 ];
 
+const DOC_CATEGORIES = [
+  "Все",
+  "Уставные документы",
+  "Распоряжения и приказы",
+  "Финансовые документы",
+  "Прочие",
+];
+
 export function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("Все");
   const [openCategory, setOpenCategory] = useState<string | null>("Уставные документы");
 
-  const filteredCategories = CATEGORIES.map((cat) => ({
-    ...cat,
-    docs: cat.docs.filter((doc) =>
-      doc.title.toLowerCase().includes(searchQuery.toLowerCase())
-    ),
-  })).filter((cat) => cat.docs.length > 0);
+  const filteredCategories = useMemo(() => {
+    let cats = [...CATEGORIES];
+    
+    // Фильтр по категории
+    if (activeCategory !== "Все") {
+      cats = cats.filter((cat) => cat.name === activeCategory);
+    }
+    
+    // Фильтр по поиску
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      cats = cats.map((cat) => ({
+        ...cat,
+        docs: cat.docs.filter((doc) => doc.title.toLowerCase().includes(q)),
+      }));
+    }
+    
+    return cats.filter((cat) => cat.docs.length > 0);
+  }, [activeCategory, searchQuery]);
+
+  const isSearching = searchQuery.length > 0;
 
   return (
     <div
-      className="min-h-screen w-full py-24 px-6 md:px-10 relative z-10"
-      style={{ fontFamily: "'Inter', sans-serif", background: "rgba(5,15,8,0.92)", paddingTop: "160px" }}
+      className="min-h-screen w-full pt-[200px] pb-24 px-6 md:px-10 relative z-10"
+      style={{ fontFamily: "'Inter', sans-serif", background: "rgba(5,15,8,0.35)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
     >
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-10">
+        <div className="mb-12 text-center">
           <p
-            className="text-xs uppercase tracking-widest font-semibold mb-3"
+            className="text-xs uppercase tracking-widest font-semibold mb-4"
             style={{ color: "#a3e635", fontFamily: "'Unbounded', sans-serif" }}
           >
             МАУК «Культурные пространства Липецка»
           </p>
           <h1
-            className="text-3xl md:text-4xl font-black mb-4"
-            style={{ color: "#ffffff", fontFamily: "'Unbounded', sans-serif", letterSpacing: "-0.02em" }}
+            className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 uppercase"
+            style={{
+              color: "#ffffff",
+              fontFamily: "'Unbounded', sans-serif",
+              letterSpacing: "-0.02em",
+              lineHeight: 1.1,
+            }}
           >
             Документы
           </h1>
-          <p className="text-sm max-w-2xl" style={{ color: "rgba(255,255,255,0.5)" }}>
+          <p
+            className="text-base md:text-lg max-w-2xl mx-auto leading-relaxed"
+            style={{ color: "rgba(255,255,255,0.5)" }}
+          >
             Официальные документы, уставы, распоряжения и финансовые отчёты
           </p>
         </div>
 
-        {/* Search */}
-        <div className="relative mb-10 w-full max-w-xl">
-          <div
-            className="flex items-center rounded-2xl px-5 py-4 gap-3 transition-all duration-300"
+        {/* Category Filters + Search */}
+        <div className="flex items-center justify-center gap-3 mb-4 flex-wrap">
+          {/* Category Chips */}
+          {DOC_CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200"
+              style={{
+                background: activeCategory === cat ? "#a3e635" : "rgba(255,255,255,0.05)",
+                color: activeCategory === cat ? "#071a0e" : "rgba(255,255,255,0.5)",
+                border: activeCategory === cat ? "1px solid rgba(163,230,53,0.3)" : "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              {cat}
+            </button>
+          ))}
+
+          {/* Search Icon */}
+          <button
+            onClick={() => setSearchOpen(!searchOpen)}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-white/10 ml-2"
             style={{
-              background: "rgba(30, 60, 30, 0.7)",
-              border: searchQuery ? "1px solid rgba(74,222,128,0.4)" : "1px solid rgba(74,222,128,0.2)",
+              background: searchOpen ? "rgba(163,230,53,0.15)" : "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.1)",
             }}
           >
-            <Search size={18} style={{ color: "rgba(255,255,255,0.4)", flexShrink: 0 }} />
+            <Search size={16} style={{ color: searchOpen ? "#a3e635" : "rgba(255,255,255,0.5)" }} />
+          </button>
+        </div>
+        
+        {/* Search Input (expandable) */}
+        <div
+          className="transition-all duration-300 ease-in-out overflow-hidden"
+          style={{
+            maxHeight: searchOpen ? "60px" : "0px",
+            opacity: searchOpen ? 1 : 0,
+            marginBottom: searchOpen ? "24px" : "0px",
+          }}
+        >
+          <div className="relative max-w-md mx-auto">
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: "rgba(255,255,255,0.4)" }} />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Поиск по документам..."
-              className="flex-1 bg-transparent text-base outline-none"
-              style={{ color: "#e8f5e9", fontFamily: "'Inter', sans-serif" }}
+              className="w-full rounded-2xl px-5 py-3 text-sm outline-none"
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                color: "#ffffff",
+                paddingLeft: "48px",
+              }}
             />
           </div>
         </div>
@@ -171,7 +241,7 @@ export function DocumentsPage() {
                   className="transition-transform duration-300"
                   style={{
                     color: "rgba(255,255,255,0.5)",
-                    transform: openCategory === category.name ? "rotate(180deg)" : "rotate(0deg)",
+                    transform: (isSearching || openCategory === category.name) ? "rotate(180deg)" : "rotate(0deg)",
                   }}
                 />
               </button>
@@ -180,8 +250,8 @@ export function DocumentsPage() {
               <div
                 className="overflow-hidden transition-all duration-500 ease-in-out"
                 style={{
-                  maxHeight: openCategory === category.name ? "800px" : "0",
-                  opacity: openCategory === category.name ? 1 : 0,
+                  maxHeight: (isSearching || openCategory === category.name) ? "800px" : "0",
+                  opacity: (isSearching || openCategory === category.name) ? 1 : 0,
                 }}
               >
                 <div className="px-5 pb-4 md:px-6 md:pb-5 pt-0" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
