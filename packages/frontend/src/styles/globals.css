@@ -88,3 +88,23 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(74, 222, 128, 0.35) rgba(5, 15, 8, 0.5);
 }
+
+/* Scroll darkening overlay - controlled via CSS variable for smooth 60fps */
+.scroll-darken {
+  opacity: var(--scroll-opacity, 0);
+  will-change: opacity;
+  transition: opacity 0.1s linear;
+}
+
+/* will-change for animated elements to promote to compositor layer */
+.nav-will-change {
+  will-change: backdrop-filter, background-color, box-shadow;
+}
+
+.button-will-change {
+  will-change: backdrop-filter, transform;
+}
+
+.video-layer {
+  will-change: transform;
+}

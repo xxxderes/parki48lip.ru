@@ -19,7 +19,8 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@lipetsk-parks/shared/*": ["../shared/src/*"]
     }
   },
   "include": ["src/**/*"],

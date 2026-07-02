@@ -2,129 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { MapPin, ArrowLeft, Clock, Trees, Phone, Globe, Check, X, ChevronLeft, ChevronRight } from "lucide-react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { usePark } from "@/app/hooks/useParks";
+import type { ParkWithRelations } from '@lipetsk-parks/shared';
 
 interface ParkDetailPageProps {
   parkId: string;
   onBack: () => void;
 }
-
-const PARKS_DATA: Record<string, any> = {
-  nizhny: {
-    name: "Нижний парк",
-    fullDescription: "Нижний парк — одна из главных достопримечательностей Липецка. Здесь каскадные пруды, фонтаны, редкие породы деревьев, цветочные клумбы и множество беседок. Парк был заложен в 1820 году.",
-    tag: "Исторический",
-    area: "46 га",
-    coords: [52.603, 39.5998],
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&auto=format",
-    gallery: [
-      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&auto=format",
-      "https://images.unsplash.com/photo-1470770841072-f978cf4d26e1?w=400&h=300&fit=crop&auto=format",
-      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop&auto=format",
-    ],
-    features: ["Пруды", "Фонтаны", "Детская площадка", "Кафе", "Wi-Fi", "Велопрокат"],
-    amenities: { parking: true, cafe: true, playground: true, wifi: true, bicycle: true, accessible: false },
-    hours: "06:00 – 22:00",
-    phone: "+7 (4742) 22-22-22",
-    website: "https://nizhny-park.lip.ru",
-    history: "Заложен в 1820 году. Изначально создавался как место отдыха горожан.",
-    address: "Ул. Интернациональная, 15",
-    color: "#a3e635",
-    zones: [
-      { name: "Каскадные пруды", coords: [52.604, 39.600], description: "Центр парка", color: "#4ade80" },
-      { name: "Оранжерея", coords: [52.603, 39.599], description: "Редкие растения", color: "#fbbf24" },
-    ],
-  },
-  pobedy: {
-    name: "Парк Победы",
-    fullDescription: "Парк Победы — главная рекреационная зона Липецка. Здесь понтонный пляж, амфитеатр, спортивные площадки. Создан в честь Победы в Великой Отечественной войне.",
-    tag: "Культурный",
-    area: "73 га",
-    coords: [52.615, 39.625],
-    image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop&auto=format",
-    gallery: [
-      "https://images.unsplash.com/photo-1542206395-9feb3ed6b610?w=400&h=300&fit=crop&auto=format",
-      "https://images.unsplash.com/photo-1558618047-f4b511e5d2ca?w=400&h=300&fit=crop&auto=format",
-    ],
-    features: ["Амфитеатр", "Пляж", "Спортзоны", "Прокат", "Кафе", "Туалеты"],
-    amenities: { parking: true, cafe: true, playground: true, wifi: true, bicycle: true, accessible: true },
-    hours: "05:00 – 24:00",
-    phone: "+7 (4742) 33-33-33",
-    website: "https://park-pobedy.lip.ru",
-    history: "Создан в честь Победы в Великой Отечественной войне.",
-    address: "Проспект Победы, 45",
-    color: "#fbbf24",
-    zones: [
-      { name: "Амфитеатр", coords: [52.616, 39.626], description: "Концерты", color: "#f97316" },
-      { name: "Пляж", coords: [52.614, 39.624], description: "Зона отдыха", color: "#4ade80" },
-    ],
-  },
-  byxanov: {
-    name: "Быханов сад",
-    fullDescription: "Быханов сад — ботанический оазис. Известен оранжереей с экзотическими растениями, цветочными клумбами и уютными кафе.",
-    tag: "Ботанический",
-    area: "12 га",
-    coords: [52.595, 39.58],
-    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&h=600&fit=crop&auto=format",
-    gallery: [
-      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop&auto=format",
-    ],
-    features: ["Оранжерея", "Цветники", "Кафе", "Аллеи", "Wi-Fi", "Детская площадка"],
-    amenities: { parking: false, cafe: true, playground: true, wifi: true, bicycle: false, accessible: true },
-    hours: "08:00 – 20:00",
-    phone: "+7 (4742) 44-44-44",
-    website: "https://bysad.lip.ru",
-    history: "Заложен в конце XIX века.",
-    address: "Ул. Ленина, 32",
-    color: "#f97316",
-    zones: [
-      { name: "Оранжерея", coords: [52.596, 39.581], description: "Растения", color: "#a855f7" },
-    ],
-  },
-  gorodskoy: {
-    name: "Городской сад",
-    fullDescription: "Городской сад — центр города с летней эстрадой, фонтанами и сквером. Идеально для коротких прогулок.",
-    tag: "Городской",
-    area: "8 га",
-    coords: [52.608, 39.612],
-    image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&h=600&fit=crop&auto=format",
-    gallery: [
-      "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop&auto=format",
-    ],
-    features: ["Фонтан", "Эстрада", "Газоны", "Кафе", "Детская площадка", "Wi-Fi"],
-    amenities: { parking: false, cafe: true, playground: true, wifi: true, bicycle: false, accessible: true },
-    hours: "07:00 – 23:00",
-    phone: "+7 (4742) 55-55-55",
-    website: "https://sad.lip.ru",
-    history: "Создан в центре города.",
-    address: "Ул. Советская, 100",
-    color: "#2dd4bf",
-    zones: [
-      { name: "Сквер", coords: [52.609, 39.613], description: "Главный вход", color: "#4ade80" },
-    ],
-  },
-  zoo: {
-    name: "Липецкий зоопарк",
-    fullDescription: "Липецкий зоопарк — уникальное место с редкими животными. Идеально для семейного отдыха.",
-    tag: "Семейный",
-    area: "25 га",
-    coords: [52.59, 39.565],
-    image: "https://images.unsplash.com/photo-1474511320723-9a56873867b3?w=800&h=600&fit=crop&auto=format",
-    gallery: [
-      "https://images.unsplash.com/photo-1546182990-d1c898c8a0f6?w=400&h=300&fit=crop&auto=format",
-    ],
-    features: ["Животные", "Павильоны", "Кафе", "Музей", "Игровая зона", "Сувениры"],
-    amenities: { parking: true, cafe: true, playground: true, wifi: true, bicycle: false, accessible: true },
-    hours: "09:00 – 18:00",
-    phone: "+7 (4742) 77-77-77",
-    website: "https://zoo.lip.ru",
-    history: "Открыт в 2000 году.",
-    address: "Ул. Зоологическая, 1",
-    color: "#a855f7",
-    zones: [
-      { name: "Экспозиция", coords: [52.591, 39.566], description: "Животные", color: "#fbbf24" },
-    ],
-  },
-};
 
 const AMENITIES = [
   { key: "parking", label: "Парковка" },
@@ -135,17 +19,72 @@ const AMENITIES = [
   { key: "accessible", label: "Доступная среда" },
 ];
 
+function mapParkForUI(park: ParkWithRelations) {
+  const amenities: Record<string, boolean> = {
+    parking: false,
+    cafe: false,
+    playground: false,
+    wifi: false,
+    bicycle: false,
+    accessible: false,
+  };
+  
+  // Parse zones from JSON
+  let zones: Array<{name: string; coords: [number, number]; description: string; color: string}> = [];
+  if (park.zones) {
+    try {
+      zones = park.zones as any;
+    } catch {}
+  }
+
+  return {
+    id: park.id,
+    name: park.name,
+    fullDescription: park.description || '',
+    tag: park.category || 'Парк',
+    area: park.area || '',
+    coords: [park.latitude || 0, park.longitude || 0] as [number, number],
+    image: park.images?.[0]?.url || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&auto=format',
+    gallery: park.images?.slice(1).map(img => img.url) || [],
+    features: [],
+    amenities,
+    hours: '06:00 – 22:00',
+    phone: '',
+    website: '',
+    history: '',
+    address: park.address || '',
+    color: park.color || '#a3e635',
+    zones,
+  };
+}
+
 export function ParkDetailPage({ parkId, onBack }: ParkDetailPageProps) {
-  const park = PARKS_DATA[parkId];
+  const { data: parkData, isLoading, error } = usePark(parkId);
+  const park = parkData ? mapParkForUI(parkData) : null;
+  
   const [currentImage, setCurrentImage] = useState(0);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  if (!park) {
+  if (isLoading) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center text-white">
-        Парк не найден
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#a3e635] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>Загрузка парка...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !park) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center text-white">
+        <div className="text-center">
+          <MapPin size={48} style={{ color: "rgba(255,255,255,0.2)", margin: "0 auto 16px" }} />
+          <p style={{ color: "rgba(255,255,255,0.4)" }}>Парк не найден</p>
+        </div>
       </div>
     );
   }

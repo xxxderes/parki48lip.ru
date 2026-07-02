@@ -1,7 +1,17 @@
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from "./app/App.tsx";
 import "./styles/index.css";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const preloader = document.getElementById("preloader")!;
 const progressBar = document.getElementById("progressBar")!;
@@ -67,7 +77,13 @@ window.addEventListener("load", () => {
 // Catch any rendering errors and still hide preloader
 try {
   const root = createRoot(document.getElementById("root")!);
-  root.render(<BrowserRouter><App /></BrowserRouter>);
+  root.render(
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
   updateProgress(92, "Отрисовка интерфейса...");
 } catch (err) {
   console.error("App render error:", err);

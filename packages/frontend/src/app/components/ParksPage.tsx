@@ -1,109 +1,7 @@
 import { useState, useMemo } from "react";
 import { Search, MapPin, ArrowRight, Filter, Trees, Clock, Accessibility, Map, Wifi, Coffee, Bike, Baby } from "lucide-react";
 import { useScrollReveal } from "@/app/hooks/useReveal";
-
-const PARKS_DATA = [
-  {
-    id: "nizhny",
-    name: "Нижний парк",
-    description: "Исторический парк XIX века с каскадными прудами, фонтанами и редкими породами деревьев. Главная достопримечательность города и место для романтических прогулок.",
-    tag: "Исторический",
-    area: "46 га",
-    coords: [52.6030, 39.5998] as [number, number],
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop&auto=format",
-    features: ["Пруды", "Фонтаны", "Детская площадка", "Кафе", "Wi-Fi", "Велопрокат"],
-    amenities: {
-      parking: true,
-      cafe: true,
-      playground: true,
-      wifi: true,
-      bicycle: true,
-      accessible: false,
-    },
-    hours: "06:00 – 22:00",
-    color: "#a3e635",
-  },
-  {
-    id: "pobedy",
-    name: "Парк Победы",
-    description: "Крупнейший парк города с аллеями боевой славы, амфитеатром, пляжем и современными спортивными зонами. Идеальное место для активного отдыха.",
-    tag: "Культурный",
-    area: "73 га",
-    coords: [52.6150, 39.6250] as [number, number],
-    image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&h=400&fit=crop&auto=format",
-    features: ["Амфитеатр", "Пляж", "Спортзоны", "Прокат", "Кафе", "Туалеты"],
-    amenities: {
-      parking: true,
-      cafe: true,
-      playground: true,
-      wifi: true,
-      bicycle: true,
-      accessible: true,
-    },
-    hours: "05:00 – 24:00",
-    color: "#fbbf24",
-  },
-  {
-    id: "byxanov",
-    name: "Быханов сад",
-    description: "Уютный тенистый сад в центре города с оранжереей, цветниками и кафе среди зелени. Идеально для тихих прогулок и любителей ботаники.",
-    tag: "Ботанический",
-    area: "12 га",
-    coords: [52.5950, 39.5800] as [number, number],
-    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=400&fit=crop&auto=format",
-    features: ["Оранжерея", "Цветники", "Кафе", "Аллеи", "Wi-Fi", "Детская"],
-    amenities: {
-      parking: false,
-      cafe: true,
-      playground: true,
-      wifi: true,
-      bicycle: false,
-      accessible: true,
-    },
-    hours: "08:00 – 20:00",
-    color: "#f97316",
-  },
-  {
-    id: "gorodskoy",
-    name: "Городской сад",
-    description: "Сердце старого Липецка: летняя эстрада, фонтан «Времена года» и вековые дубы. Живое место города для коротких отдыхов и встреч.",
-    tag: "Городской",
-    area: "8 га",
-    coords: [52.6080, 39.6120] as [number, number],
-    image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=600&h=400&fit=crop&auto=format",
-    features: ["Фонтан", "Эстрада", "Газоны", "Кафе", "Детская площадка", "Wi-Fi"],
-    amenities: {
-      parking: false,
-      cafe: true,
-      playground: true,
-      wifi: true,
-      bicycle: false,
-      accessible: true,
-    },
-    hours: "07:00 – 23:00",
-    color: "#2dd4bf",
-  },
-  {
-    id: "zoo",
-    name: "Липецкий зоопарк",
-    description: "Уникальная зоология с редкими видами животных, павильонами и интерактивными зонами. Идеально для поездки с детьми и изучения фауны.",
-    tag: "Семейный",
-    area: "25 га",
-    coords: [52.5900, 39.5650] as [number, number],
-    image: "https://images.unsplash.com/photo-1564349683136-77e08c1c1535?w=600&h=400&fit=crop&auto=format",
-    features: ["Авторитры", "Павильоны", "Кафе", "Музей", "Игровая зона", "Сувениры"],
-    amenities: {
-      parking: true,
-      cafe: true,
-      playground: true,
-      wifi: true,
-      bicycle: false,
-      accessible: true,
-    },
-    hours: "09:00 – 18:00",
-    color: "#a855f7",
-  },
-];
+import { useParks } from "@/app/hooks/useParks";
 
 const ALL_FILTERS = [
   { key: "parking", label: "Парковка", icon: MapPin },
@@ -114,13 +12,51 @@ const ALL_FILTERS = [
   { key: "accessible", label: "Доступность", icon: Accessibility },
 ];
 
-type AmenityKey = keyof typeof PARKS_DATA[0]["amenities"];
+type AmenityKey = "parking" | "cafe" | "playground" | "wifi" | "bicycle" | "accessible";
+
+interface ParkUI {
+  id: string;
+  name: string;
+  description: string;
+  tag: string;
+  area: string;
+  image: string;
+  features: string[];
+  amenities: Record<AmenityKey, boolean>;
+  hours: string;
+  color: string;
+}
+
+function mapParkToUI(park: any): ParkUI {
+  const amenities: Record<AmenityKey, boolean> = {
+    parking: false,
+    cafe: false,
+    playground: false,
+    wifi: false,
+    bicycle: false,
+    accessible: false,
+  };
+  
+  return {
+    id: park.id,
+    name: park.name,
+    description: park.shortDescription || park.description || '',
+    tag: park.category || 'Парк',
+    area: park.area || '',
+    image: park.images?.[0]?.url || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop&auto=format',
+    features: [],
+    amenities,
+    hours: '06:00 – 22:00',
+    color: park.color || '#a3e635',
+  };
+}
 
 interface ParksPageProps {
   onSelectPark: (id: string) => void;
 }
 
 export function ParksPage({ onSelectPark }: ParksPageProps) {
+  const { data: parksData, isLoading, error } = useParks();
   const [search, setSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState<AmenityKey[]>([]);
   const [showFilters, setShowFilters] = useState(false);
@@ -131,8 +67,10 @@ export function ParksPage({ onSelectPark }: ParksPageProps) {
     );
   };
 
+  const parks = useMemo(() => (parksData || []).map(mapParkToUI), [parksData]);
+
   const filteredParks = useMemo(() => {
-    return PARKS_DATA.filter(park => {
+    return parks.filter(park => {
       const matchesSearch =
         park.name.toLowerCase().includes(search.toLowerCase()) ||
         park.description.toLowerCase().includes(search.toLowerCase()) ||
@@ -144,11 +82,33 @@ export function ParksPage({ onSelectPark }: ParksPageProps) {
 
       return matchesSearch && matchesFilters;
     });
-  }, [search, activeFilters]);
+  }, [search, activeFilters, parks]);
 
   const { ref: headerRef, isVisible: headerVisible } = useScrollReveal(0);
   const { ref: filtersRef, isVisible: filtersVisible } = useScrollReveal(100);
   const { ref: cardsRef, isVisible: cardsVisible } = useScrollReveal(200);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full pt-[200px] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#a3e635] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>Загрузка парков...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen w-full pt-[200px] flex items-center justify-center">
+        <div className="text-center">
+          <Trees size={48} style={{ color: "rgba(255,255,255,0.2)", margin: "0 auto 16px" }} />
+          <p style={{ color: "rgba(255,255,255,0.4)" }}>Ошибка загрузки парков</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -288,7 +248,7 @@ export function ParksPage({ onSelectPark }: ParksPageProps) {
                     {park.tag}
                   </span>
 
-                  {/* Точки/хиты на карте изначальны */}
+                  {/* Инфо снизу */}
                   <div className="absolute bottom-4 left-4 right-4">
                     <h3 className="text-xl font-black mb-1" style={{ color: "#ffffff", fontFamily: "'Unbounded', sans-serif" }}>
                       {park.name}

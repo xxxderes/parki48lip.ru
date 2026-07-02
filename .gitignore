@@ -1,9 +1,38 @@
+# Root
 node_modules/
 dist/
-nvidia-api-rate-limiter/
+build/
 .env
 .env.local
 .env.*.local
 *.log
 .DS_Store
 Thumbs.db
+*.tsbuildinfo
+
+# Packages
+packages/*/node_modules/
+packages/*/dist/
+packages/*/build/
+packages/*/.env
+packages/*/.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+coverage/
+.nyc_output/
+
+# Prisma
+packages/backend/prisma/migrations/
+
+# Turbo
+.turbo/

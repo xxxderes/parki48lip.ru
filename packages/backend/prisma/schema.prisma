@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Park {
+  id              String    @id @default(cuid())
+  name            String
+  slug            String    @unique
+  description     String?
+  shortDescription String?
+  address         String?
+  area            String?
+  latitude        Float?
+  longitude       Float?
+  isActive        Boolean   @default(true)
+  category        String?
+  color           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  images          ParkImage[]
+  events          Event[]
+  routes          Route[]
+  zones           Zone[]
+
+  @@index([slug])
+  @@index([isActive])
+}
+
+model ParkImage {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  order     Int      @default(0)
+  parkId    String
+  park      Park     @relation(fields: [parkId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([parkId])
+}
+
+model Event {
+  id              String    @id @default(cuid())
+  title           String
+  description     String?
+  shortDescription String?
+  startDate       DateTime
+  endDate         DateTime?
+  location        String?
+  image           String?
+  isActive        Boolean   @default(true)
+  isFeatured      Boolean   @default(false)
+  capacity        Int?
+  price           Float?
+  category        String?
+  parkId          String?
+  park            Park?     @relation(fields: [parkId], references: [id], onDelete: SetNull)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([parkId])
+  @@index([startDate])
+  @@index([isActive])
+}
+
+model Route {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  distance    Float?
+  duration    Int?
+  difficulty  String?
+  gpxData     String?
+  isActive    Boolean  @default(true)
+  parkId      String
+  park        Park     @relation(fields: [parkId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([parkId])
+}
+
+model Zone {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  type        String?
+  coordinates Json?
+  isActive    Boolean  @default(true)
+  parkId      String
+  park        Park     @relation(fields: [parkId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([parkId])
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         String   @default("admin")
+  isActive     Boolean  @default(true)
+  lastLogin    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PageContent {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  content   Json
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  fileUrl     String
+  fileType    String
+  category    String?
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
