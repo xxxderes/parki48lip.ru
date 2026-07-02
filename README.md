@@ -14,6 +14,19 @@
 
 ---
 
+## 📁 Структура репозитория
+
+```
+├── packages/
+│   ├── frontend/          # React + Vite фронтенд
+│   ├── backend/           # API сервер (в разработке)
+│   └── shared/            # Общие типы и утилиты
+├── README.md              # ← теперь тут
+└── LICENSE                # ← и тут
+```
+
+---
+
 ## 🎞️ Демо-видео
 
 [![Watch the video](https://img.youtube.com/vi/XXXXX/maxresdefault.jpg)](https://github.com/user-attachments/assets/2jflash46/tour.mp4)
@@ -59,43 +72,46 @@
 git clone <repository-url>
 cd "Сайт о парках Липецка"
 
-# Установка зависимостей
-npm install
+# Установка зависимостей (pnpm)
+pnpm install
 
-# Запуск dev-сервера
-npm run dev
+# Запуск dev-сервера (фронтенд)
+cd packages/frontend
+pnpm run dev
 ```
 
 ### Скрипты
 
-| Команда | Описание |
-|---------|----------|
-| `npm run dev` | Запуск dev-сервера |
-| `npm run build` | Production-сборка |
+| Команда (из корня monorepo) | Описание |
+|------------------------------|----------|
+| `cd packages/frontend && pnpm run dev` | Запуск dev-сервера |
+| `cd packages/frontend && pnpm run build` | Production-сборка |
+| `cd packages/backend && pnpm run dev` | Запуск API сервера |
 
 ---
 
-## 🏛️ Архитектура проекта
+## 🏛️ Архитектура проекта (frontend)
 
 ```
-├── public/                        # Статические файлы
-├── src/
-│   ├── app/
-│   │   ├── components/
-│   │   │   ├── ui/                # 30+ компонентов shadcn/ui
-│   │   │   ├── ParksPage.tsx      # Каталог парков (5 объектов)
-│   │   │   ├── ParkDetailPage.tsx # Детальная страница парка
-│   │   │   ├── EventsPage.tsx     # Календарь событий (6 категорий)
-│   │   │   ├── RoutesPage.tsx     # Туристические маршруты
-│   │   │   ├── TeamPage.tsx       # Команда организации
-│   │   │   ├── DocumentsPage.tsx # Документы
-│   │   │   └── ContactsPage.tsx   # Контакты
-│   ├── data/
-│   │   └── teamData.ts            # Данные о сотрудниках
-│   ├── hooks/
-│   │   └── useReveal.ts           # Intersection Observer
-│   └── styles/                     # Глобальные стили, тема
-└── index.html                       # SEO-микроразметка
+├── packages/frontend/
+│   ├── public/                      # Статические файлы
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── components/
+│   │   │   │   ├── ui/              # 30+ компонентов shadcn/ui
+│   │   │   │   ├── ParksPage.tsx    # Каталог парков (5 объектов)
+│   │   │   │   ├── ParkDetailPage.tsx # Детальная страница парка
+│   │   │   │   ├── EventsPage.tsx   # Календарь событий (6 категорий)
+│   │   │   │   ├── RoutesPage.tsx   # Туристические маршруты
+│   │   │   │   ├── TeamPage.tsx     # Команда организации
+│   │   │   │   ├── DocumentsPage.tsx # Документы
+│   │   │   │   └── ContactsPage.tsx # Контакты
+│   │   ├── data/
+│   │   │   └── teamData.ts          # Данные о сотрудниках
+│   │   ├── hooks/
+│   │   │   └── useReveal.ts         # Intersection Observer
+│   │   └── styles/                   # Глобальные стили, тема
+│   └── index.html                    # SEO-микроразметка
 ```
 
 ---
